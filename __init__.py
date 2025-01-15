@@ -2,23 +2,29 @@ bl_info = {
     "name": "Robust Weight Transfer",
     "author": "sentfromspacevr",
     "version": (1, 0),
-    "blender": (2, 93, 0),
+    "blender": (4, 2, 0),
     "doc_url": "https://sentfromspacevr.gumroad.com/l/robust-weight-transfer",
     "location": "View3D > Sidebar > SENT Tab",
     "category": "Object",
 }
 
 import sys
-import os
+import site
 
-libs_path = os.path.join(os.path.dirname(__file__), 'deps')
-if libs_path not in sys.path:
-    sys.path.append(libs_path)
+sys.path.insert(0, site.USER_SITE)
+
+try :
+	import numpy as np
+	import scipy as sp
+	import igl
+	import robust_laplacian
+except ModuleNotFoundError as e:
+    import pip
+    pip.main(["install", "scipy", "libigl", "robust-laplacian", "--target", site.USER_SITE])
+    raise ValueError("Installed Dependencies. Please restart blender")
 
 import bpy
 import bmesh
-import igl
-import numpy as np
 from .weighttransfer import find_matches_closest_surface, inpaint, limit_mask, smooth_weigths
 import webbrowser
 import math
@@ -600,7 +606,7 @@ class SentFromSpacePanel(bpy.types.Panel):
             bpy.utils.unregister_class(cls)
     
         
-    def draw(self, context):
+    def draw(self, ctx: bpy.types.Context):
         layout = self.layout
         col = layout.column(align=True)
         row = col.row(align=True)
